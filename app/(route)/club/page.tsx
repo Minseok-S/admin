@@ -2,6 +2,7 @@
 import { useAuth } from "@/src/features/auth/model/model";
 import { useEffect, useState } from "react";
 import { AdminMenu } from "@/src/widgets/AdminMenu";
+import { PaginationControls } from "@/src/widgets/PaginationControls/intex";
 
 interface Application {
   id: number;
@@ -14,9 +15,7 @@ interface Application {
   major: string;
   student_id: string;
   grade: string;
-  created_at: string;
-  message: string;
-  status: string;
+  is_cherry_club_member: number;
   [key: string]: string | number;
 }
 
@@ -31,13 +30,12 @@ export default function CherryApplicationsPage() {
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 20; // 한 페이지당 표시할 항목 수
 
   const { isAuthenticated, user, handleLogout } = useAuth();
 
   const handleLogoutAndRedirect = () => {
     handleLogout();
-    window.location.href = "/admin";
+    window.location.href = "/";
   };
 
   useEffect(() => {
@@ -50,7 +48,7 @@ export default function CherryApplicationsPage() {
           }
 
           const response = await fetch(
-            `/api/club-users?authority=${user.authority}&region=${user.region}&university=${user.university}&page=${currentPage}&limit=${limit}`,
+            `/api/club-users?authority=${user.authority}&region=${user.region}&university=${user.university}&page=${currentPage}`,
             {
               headers: {
                 Authorization: `Bearer ${JSON.parse(token).token}`,
@@ -67,8 +65,9 @@ export default function CherryApplicationsPage() {
           }
 
           const result = await response.json();
+
           setData(result.data);
-          setTotalPages(result.pagination.totalPages);
+          setTotalPages(Math.ceil(result.pagination.total / 20));
 
           const regions: string[] = [
             ...new Set<string>(
@@ -87,7 +86,7 @@ export default function CherryApplicationsPage() {
   // 상태 변경 핸들러 수정
   const handleStatusChange = async (id: number, status: string) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("토큰이 없습니다");
       }
@@ -123,48 +122,51 @@ export default function CherryApplicationsPage() {
   };
 
   // 필터링된 데이터 계산
-  const filteredData = data.filter((item) => {
-    // 날짜 범위 필터링
-    if (dateRange.start && dateRange.end) {
-      const itemDate = new Date(item.created_at);
-      const startDate = new Date(dateRange.start);
-      const endDate = new Date(dateRange.end);
+  const filteredData = data
+    .filter((item) => {
+      // 날짜 범위 필터링
+      if (dateRange.start && dateRange.end) {
+        const itemDate = new Date(item.created_at);
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
 
-      if (itemDate < startDate || itemDate > endDate) {
-        return false;
+        if (itemDate < startDate || itemDate > endDate) {
+          return false;
+        }
       }
-    }
 
-    // 검색어가 있으면 모든 필드에서 검색
-    if (searchTerm) {
-      const searchableFields = Object.values(item)
-        .filter((value) => typeof value === "string")
-        .map((value) => value.toLowerCase());
+      // 검색어가 있으면 모든 필드에서 검색
+      if (searchTerm) {
+        const searchableFields = Object.values(item)
+          .filter((value) => typeof value === "string")
+          .map((value) => value.toLowerCase());
 
-      if (
-        !searchableFields.some((field) =>
-          field.includes(searchTerm.toLowerCase())
-        )
-      ) {
-        return false;
+        if (
+          !searchableFields.some((field) =>
+            field.includes(searchTerm.toLowerCase())
+          )
+        ) {
+          return false;
+        }
       }
-    }
 
-    // 개별 필터링
-    return Object.entries(filters).every(([key, filterValue]) => {
-      if (filterValue && item[key] !== filterValue) {
-        return false;
-      }
-      return true;
-    });
-  });
+      // 개별 필터링
+      return Object.entries(filters).every(([key, filterValue]) => {
+        if (filterValue && item[key] != filterValue) {
+          return false;
+        }
+        return true;
+      });
+    })
+    .slice((currentPage - 1) * 20, currentPage * 20);
 
   // 필터 변경 핸들러
   const handleFilterChange = (field: string, value: string) => {
     setCurrentPage(1);
+
     setFilters((prev) => ({
       ...prev,
-      [field]: value === "all" ? "" : value,
+      [field]: value == "all" ? "" : value,
     }));
   };
 
@@ -182,33 +184,6 @@ export default function CherryApplicationsPage() {
     setCurrentPage(1);
     setSearchTerm(value);
   };
-
-  // 모바일용 페이징 컨트롤 수정
-  const PaginationControls = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm py-2 z-40">
-      <div className="flex justify-center items-center gap-2">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 disabled:opacity-50 text-sm"
-        >
-          이전
-        </button>
-        <span className="px-3 py-1 bg-gray-800 text-white text-sm">
-          {currentPage} / {totalPages}
-        </span>
-        <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 disabled:opacity-50 text-sm"
-        >
-          다음
-        </button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="p-2 sm:p-4 mx-2 sm:mx-24 bg-black text-white pb-20">
@@ -283,16 +258,18 @@ export default function CherryApplicationsPage() {
         </div>
         <div className="space-y-1 col-span-1">
           <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1">
-            상태
+            동아리 참여 상태
           </label>
           <div className="relative">
             <select
-              onChange={(e) => handleFilterChange("status", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange("is_cherry_club_member", e.target.value)
+              }
               className="appearance-none bg-gray-800 border border-gray-600 rounded-lg px-2 py-1 sm:px-3 sm:py-2 text-white w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:bg-gray-700 cursor-pointer text-xs sm:text-sm"
             >
               <option value="all">모든 상태</option>
-              <option value={1}>참여</option>
-              <option value={0}>포기</option>
+              <option value={1}>진행</option>
+              <option value={0}>중단</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -401,11 +378,9 @@ export default function CherryApplicationsPage() {
               <th className="px-2 py-1 sm:px-6 sm:py-3 text-center text-white">
                 비전캠프 기수
               </th>
+
               <th className="px-2 py-1 sm:px-6 sm:py-3 text-center text-white">
-                참여 일시
-              </th>
-              <th className="px-2 py-1 sm:px-6 sm:py-3 text-center text-white">
-                동아리 상태
+                동아리 참여 상태
               </th>
             </tr>
           </thead>
@@ -464,10 +439,6 @@ export default function CherryApplicationsPage() {
                   </td>
 
                   <td className="px-2 py-1 sm:px-6 sm:py-4 text-center">
-                    {new Date(item.created_at).toLocaleString()}
-                  </td>
-
-                  <td className="px-2 py-1 sm:px-6 sm:py-4 text-center">
                     <select
                       value={item.is_cherry_club_member}
                       onChange={(e) =>
@@ -475,7 +446,7 @@ export default function CherryApplicationsPage() {
                       }
                       className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white"
                     >
-                      <option value={1}>참여</option>
+                      <option value={1}>진행</option>
                       <option value={0}>중단</option>
                     </select>
                   </td>
@@ -486,7 +457,11 @@ export default function CherryApplicationsPage() {
         </table>
       </div>
 
-      <PaginationControls />
+      <PaginationControls
+        setCurrentPage={setCurrentPage}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      />
     </div>
   );
 }

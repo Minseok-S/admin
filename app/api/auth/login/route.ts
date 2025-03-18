@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       authority: user.authority,
       university: user.university,
       region: user.region,
-      exp: Math.floor(Date.now() / 1000) + 1800, // 30분 후 만료
+      exp: Math.floor(Date.now() / 1000) + 3600, // 1시간 후 만료
     };
 
     // JWT_SECRET 환경 변수 검증

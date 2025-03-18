@@ -5,18 +5,13 @@ import jwt from "jsonwebtoken";
 
 export async function GET(request: Request) {
   try {
-    // Authorization 헤더 확인
     const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
-
-    // JWT 검증
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET 환경 변수가 설정되지 않았습니다");
-    }
+    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET 미설정");
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
       authority: number;
@@ -24,13 +19,7 @@ export async function GET(request: Request) {
       university: string;
     };
 
-    // 권한 검증 추가
-
-    if (
-      decoded.authority === undefined ||
-      decoded.authority === null ||
-      decoded.authority > 7
-    ) {
+    if (decoded.authority > 7) {
       return NextResponse.json(
         { error: "접근 권한이 없습니다" },
         { status: 403 }
@@ -40,18 +29,13 @@ export async function GET(request: Request) {
     const connection = await pool.getConnection();
     const { searchParams } = new URL(request.url);
 
-    // 페이징 파라미터
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const offset = (page - 1) * limit;
-
-    // URL 파라미터에서 권한 정보 추출
     const authority = searchParams.get("authority");
     const region = searchParams.get("region");
     const university = searchParams.get("university");
 
-    let query = "SELECT * FROM users WHERE is_cherry_club_member = 1";
-    const params = [];
+    let query =
+      "SELECT id, name, gender, phone, birthday, region, university, major, student_id, grade, is_cherry_club_member, vision_camp_batch FROM users WHERE is_cherry_club_member != -1 AND group_number != '졸업'";
+    const params: any[] = [];
 
     if (authority === "3") {
       query += " AND region = ?";
@@ -61,19 +45,20 @@ export async function GET(request: Request) {
       params.push(university, region);
     }
 
-    // 페이징 추가
-    query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    params.push(limit, offset);
+    query += " ORDER BY created_at DESC";
 
     const [rows] = await connection.query(query, params);
 
-    // 전체 개수 조회 (페이징을 위해)
-    let countQuery = "SELECT COUNT(*) as total FROM users";
-    if (authority === "3") {
-      countQuery += " WHERE region = ?";
-    } else if (authority === "4") {
-      countQuery += " WHERE university = ? AND region = ?";
-    }
+    const countQuery = `
+      SELECT COUNT(*) as total FROM users WHERE is_cherry_club_member != -1 AND group_number != '졸업' 
+      ${
+        authority === "3"
+          ? "AND region = ?"
+          : authority === "4"
+          ? "AND university = ? AND region = ?"
+          : ""
+      }
+    `;
     const [countResult] = await connection.query(
       countQuery,
       params.slice(0, -2)
@@ -81,21 +66,15 @@ export async function GET(request: Request) {
     const total = (countResult as mysql.RowDataPacket[])[0].total;
 
     connection.release();
+
     return NextResponse.json(
       {
         data: rows,
         pagination: {
-          page,
-          limit,
           total,
-          totalPages: Math.ceil(total / limit),
         },
       },
-      {
-        headers: {
-          "Cache-Control": "public, max-age=60",
-        },
-      }
+      { headers: { "Cache-Control": "public, max-age=60" } }
     );
   } catch (error) {
     console.error("Database error:", error);
@@ -105,10 +84,7 @@ export async function GET(request: Request) {
         { status: 401 }
       );
     }
-    return NextResponse.json(
-      { error: "서버 내부 오류가 발생했습니다" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "서버 내부 오류" }, { status: 500 });
   }
 }
 
