@@ -34,7 +34,7 @@ const Header = () => {
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white/90 backdrop-blur-md shadow-sm py-2"
+          ? "bg-gray-900  backdrop-blur-md shadow-sm py-2"
           : "bg-transparent py-4"
       }`}
     >
@@ -52,7 +52,7 @@ const Header = () => {
               <Link
                 key={index}
                 href={item.path}
-                className={`px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors ${
+                className={`px-3 py-2 text-white rounded-full text-sm font-medium hover:bg-gray-100 hover:text-gray-800 transition-colors ${
                   item.path === "/join"
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "text-gray-700"
