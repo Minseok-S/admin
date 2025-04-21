@@ -17,6 +17,7 @@ export default function Home() {
   const [showTitle, setShowTitle] = useState(false);
   const [videoDarken, setVideoDarken] = useState(false);
   const [videoModal, setVideoModal] = useState(false);
+  const [videoSrc, setVideoSrc] = useState("title.mp4");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -79,10 +80,26 @@ export default function Home() {
       });
     });
 
+    // 화면 크기 감지 함수
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setVideoSrc("title_mobile.mp4");
+      } else {
+        setVideoSrc("title.mp4");
+      }
+    };
+
+    // 초기 실행
+    handleResize();
+
+    // 리사이즈 이벤트 리스너 등록
+    window.addEventListener("resize", handleResize);
+
     return () => {
       animations.revert();
       clearTimeout(titleTimer);
       clearTimeout(darkenTimer);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -108,7 +125,7 @@ export default function Home() {
                     ease: [0.2, 0.65, 0.3, 1],
                     scale: { type: "spring", stiffness: 80 },
                   }}
-                  className="text-6xl md:text-9xl font-extrabold text-white mb-8 tracking-tighter drop-shadow-[0_0_25px_rgba(0,0,255,0.5)] bg-clip-text"
+                  className="text-5xl sm:text-6xl md:text-9xl font-extrabold text-white mb-8 tracking-tighter drop-shadow-[0_0_15px_rgba(0,0,255,0.8)] md:drop-shadow-[0_0_35px_rgba(0,0,255,0.8)] bg-clip-text"
                 >
                   CHERRY CLUB
                 </motion.h1>
@@ -116,11 +133,11 @@ export default function Home() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="mt-8"
+                  className="mt-8 sm:mt-6 md:mt-8"
                 >
                   <button
                     onClick={() => setVideoModal(true)}
-                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-white/30 transition-all hover:scale-105 border border-white/30 mb-12"
+                    className="bg-white/20 backdrop-blur-sm text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-base sm:text-lg font-medium hover:bg-white/30 transition-all hover:scale-105 border border-white/30 mb-8 sm:mb-12"
                   >
                     전체 동영상 보기
                   </button>
@@ -165,7 +182,7 @@ export default function Home() {
           )}
         </AnimatePresence>
         <video
-          src="title_mobile.mp4"
+          src={videoSrc}
           className="absolute inset-0 w-full h-full object-cover object-center z-[-1]"
           autoPlay
           muted
