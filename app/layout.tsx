@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import JoinButton from "@/components/JoinButton";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,21 +17,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "cherryClub",
-  description: "NCMN 체리동아리",
-  keywords: ["체리동아리", "NCMN", "cherryClub", "동아리", "프로그래밍"],
+  title: "NCMN 동아리",
+  description: "NCMN 동아리 홍보 및 모집 홈페이지",
+  keywords: ["NCMN", "동아리", "리더십", "캠퍼스", "사역"],
   icons: {
-    icon: "/logo_black.png",
+    icon: "/logo.png",
   },
-  metadataBase: new URL("https://cherryclub.kr"),
-  verification: {
-    google: "AfbSCOA6OJyn397jAZTPzyYip29W3vZBJa-bNxqD5nI",
-  },
+  metadataBase: new URL("https://ncmn-club.com"),
   openGraph: {
-    title: "체리동아리",
-    description: "NCMN 체리동아리",
-    url: "https://cherryclub.kr",
-    siteName: "cherryClub",
+    title: "NCMN 동아리",
+    description: "NCMN 동아리 홍보 및 모집 홈페이지",
+    url: "https://ncmn-club.com",
+    siteName: "NCMN 동아리",
     images: [
       {
         url: "/og-image.png",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "체리동아리",
-    description: "NCMN 체리동아리",
+    title: "NCMN 동아리",
+    description: "NCMN 동아리 홍보 및 모집 홈페이지",
   },
   robots: {
     index: true,
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://cherryclub.kr",
+    canonical: "https://ncmn-club.com",
   },
 };
 
@@ -68,15 +68,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <meta
-        name="google-site-verification"
-        content="AfbSCOA6OJyn397jAZTPzyYip29W3vZBJa-bNxqD5nI"
-      />
+    <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#121212] text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black`}
       >
-        {children}
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">{children}</main>
+          <JoinButton />
+          <Footer />
+        </div>
         <Analytics />
       </body>
     </html>
