@@ -19,15 +19,12 @@ interface FormData {
 
 export default function JoinPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting: formIsSubmitting },
+    formState: { errors },
     reset,
   } = useForm<FormData>();
 
@@ -58,7 +55,6 @@ export default function JoinPage() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsSubmitting(true);
-    setError(null);
 
     try {
       const response = await fetch("/api/application/cherry_club", {
@@ -73,20 +69,14 @@ export default function JoinPage() {
 
       if (!response.ok) {
         if (result.error === "duplicate_phone") {
-          setError("이미 등록된 전화번호입니다.");
         } else if (result.error === "duplicate_email") {
-          setError("이미 등록된 이메일입니다.");
         } else {
-          setError(result.error || "신청서 제출 중 오류가 발생했습니다.");
         }
         setIsSubmitting(false);
         return;
       }
 
-      setIsSuccess(true);
       reset();
-    } catch (err) {
-      setError("신청서 제출 중 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setIsSubmitting(false);
     }
@@ -153,11 +143,7 @@ export default function JoinPage() {
                   </p>
                 </div>
 
-                {submitError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
-                    {submitError}
-                  </div>
-                )}
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6"></div>
 
                 <form
                   onSubmit={handleSubmit(onSubmit)}

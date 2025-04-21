@@ -1,8 +1,6 @@
 "use client";
-
 import { useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -248,52 +246,9 @@ export default function LeadershipPage() {
                   <p className="text-gray-600 mb-2">
                     2박 3일간 진행되는 집중 리더십 훈련 캠프
                   </p>
-                  <p>
-                    <span className="font-semibold">일정:</span> 7월 둘째 주
-                    금-일
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col md:flex-row gsap-fade-in">
-                <div className="md:w-1/4 mb-4 md:mb-0">
-                  <span className="text-xl font-semibold text-blue-600">
-                    9월
-                  </span>
-                </div>
-                <div className="md:w-3/4 bg-gray-50 p-6 rounded-lg">
-                  <h3 className="font-bold text-lg mb-2">프로젝트 리더십</h3>
-                  <p className="text-gray-600 mb-2">
-                    실제 프로젝트를 기획하고 실행하는 실습 과정
-                  </p>
-                  <p>
-                    <span className="font-semibold">일정:</span> 9월-11월 (10주
-                    과정)
-                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA 섹션 */}
-      <section className="py-16 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6 gsap-fade-in">
-            리더십 훈련 프로그램에 참여하세요
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto gsap-fade-in">
-            지금 NCMN 동아리에 가입하고 체계적인 리더십 훈련 프로그램에
-            참여하세요. 당신의 잠재력을 발휘할 수 있는 기회가 기다리고 있습니다.
-          </p>
-          <div className="gsap-fade-in">
-            <Link
-              href="/join"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              동아리 가입하기
-            </Link>
           </div>
         </div>
       </section>
