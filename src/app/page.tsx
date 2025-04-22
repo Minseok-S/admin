@@ -6,18 +6,36 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
+  useAnimation,
 } from "framer-motion";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 
+// 카드 데이터 타입 정의
+interface CardData {
+  id: number;
+  title: string;
+  image: string;
+  tag: string;
+  descriptions: string[];
+  link: string;
+  bgColor1: string;
+  bgColor2: string;
+}
+
 export default function Home() {
   const ref = useRef(null);
+  const sliderRef = useRef(null);
   const [showTitle, setShowTitle] = useState(false);
   const [videoDarken, setVideoDarken] = useState(false);
   const [videoModal, setVideoModal] = useState(false);
   const [videoSrc, setVideoSrc] = useState("title.mp4");
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const controls = useAnimation();
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -25,6 +43,62 @@ export default function Home() {
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  // 카드 데이터
+  const cards: CardData[] = [
+    {
+      id: 1,
+      title: "리더십 훈련",
+      image: "/images/home/leadership-training.png",
+      tag: "왕의 지도력 훈련",
+      descriptions: [
+        "예수 그리스도의 리더십을 본받아, 나의 신분과 사명을 바로 알고,",
+        "사자의 리더십(사역)과 양의 리더십(관계)을 훈련합니다!",
+        "올바른 지도력을 발휘하는 성경적 방법인 셀프 리더십을 훈련합니다!",
+      ],
+      link: "/leadership",
+      bgColor1: "bg-blue-100",
+      bgColor2: "bg-purple-100",
+    },
+    {
+      id: 2,
+      title: "캠퍼스 사역",
+      image: "/images/home/campus-ministry.png",
+      tag: "5K 무료나눔",
+      descriptions: [
+        "체리동아리의 캠퍼스 사역은 대학캠퍼스에 부흥을 이끄는 사역입니다.",
+        "대학캠퍼스 안에서 5K 무료나눔, 5K 청년밥차, 캠퍼스 워십, Red HeartDay를 주도합니다!",
+      ],
+      link: "/campus",
+      bgColor1: "bg-green-100",
+      bgColor2: "bg-blue-100",
+    },
+    {
+      id: 3,
+      title: "전체/지역모임",
+      image: "/images/home/regional-meeting.png",
+      tag: "전체모임",
+      descriptions: [
+        "매월 1회 전체모임과 지역별 모임을 통해 체리 동아리 회원들은 예배와 교제를 통해 비전을 공유하고 함께 성장합니다.",
+      ],
+      link: "/meetings",
+      bgColor1: "bg-yellow-100",
+      bgColor2: "bg-red-100",
+    },
+    {
+      id: 4,
+      title: "대외사역",
+      image: "/images/home/outreach.png",
+      tag: "DMZ 기도행진",
+      descriptions: [
+        "체리 동아리는 캠퍼스를 넘어 지역사회와 나라를 섬기는 다양한 대외사역을 주도합니다!",
+        "레드하트 캠페인, My5K, 사랑나눔버스, DMZ 기도 행진 등을 통해 하나님의 사랑을 실천합니다!",
+      ],
+      link: "/outreach",
+      bgColor1: "bg-purple-100",
+      bgColor2: "bg-blue-100",
+    },
+  ];
 
   useEffect(() => {
     // 3초 후 배경 어둡게
@@ -82,6 +156,9 @@ export default function Home() {
 
     // 화면 크기 감지 함수
     const handleResize = () => {
+      const mobileView = window.innerWidth < 768;
+      setIsMobile(mobileView);
+
       if (window.innerWidth < 768) {
         setVideoSrc("title_mobile.mp4");
       } else {
@@ -102,6 +179,115 @@ export default function Home() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  // 슬라이드 제어 함수
+  const handleDragEnd = (e: any, info: any) => {
+    if (!isMobile) return;
+
+    const threshold = 50;
+    const velocity = 0.5;
+
+    if (
+      info.offset.x < -threshold &&
+      info.velocity.x < -velocity &&
+      currentSlide < cards.length - 1
+    ) {
+      setCurrentSlide(currentSlide + 1);
+    } else if (
+      info.offset.x > threshold &&
+      info.velocity.x > velocity &&
+      currentSlide > 0
+    ) {
+      setCurrentSlide(currentSlide - 1);
+    } else {
+      // 원래 위치로 복귀
+      controls.start({ x: -currentSlide * 100 + "%" });
+    }
+  };
+
+  useEffect(() => {
+    if (isMobile) {
+      controls.start({ x: -currentSlide * 100 + "%" });
+    }
+  }, [currentSlide, controls, isMobile]);
+
+  // 카드 렌더링 함수
+  const renderCard = (card: CardData, index: number) => {
+    return (
+      <motion.div
+        key={card.id}
+        className={`gsap-fade-in group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden border border-gray-100 ${
+          isMobile ? "min-w-full" : ""
+        }`}
+        whileHover={
+          isMobile
+            ? undefined
+            : {
+                y: -8,
+                transition: { duration: 0.3 },
+              }
+        }
+        whileTap={{ scale: 0.98 }}
+      >
+        <div
+          className={`absolute -right-20 -top-20 w-40 h-40 ${card.bgColor1} rounded-full opacity-30`}
+        ></div>
+        <div
+          className={`absolute -left-10 -bottom-10 w-28 h-28 ${card.bgColor2} rounded-full opacity-30`}
+        ></div>
+
+        <div className="relative h-52 sm:h-64 md:h-72 rounded-xl sm:rounded-2xl overflow-hidden mb-5 sm:mb-8 transform transition-transform duration-700 group-hover:scale-[1.02] shadow-lg">
+          <Image
+            src={card.image}
+            alt={card.title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
+          <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white/90 backdrop-blur-sm px-3 sm:px-4 py-1 rounded-full">
+            <span className="text-blue-700 font-semibold text-xs sm:text-sm">
+              {card.tag}
+            </span>
+          </div>
+        </div>
+        <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-gray-800 flex items-center">
+          <span className="bg-blue-600 text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-sm mr-2 sm:mr-3">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          {card.title}
+        </h3>
+        {card.descriptions.map((desc: string, i: number) => (
+          <p
+            key={i}
+            className={`text-base sm:text-lg text-gray-600 ${
+              i === card.descriptions.length - 1 ? "mb-4 sm:mb-6" : ""
+            }`}
+            style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
+          >
+            {desc}
+          </p>
+        ))}
+        <Link
+          href={card.link}
+          className="touch-manipulation inline-flex items-center text-blue-600 font-medium text-base sm:text-lg hover:text-blue-500 transition-colors group-hover:underline active:text-blue-700"
+        >
+          자세히 알아보기
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 sm:h-6 sm:w-6 ml-2 transition-transform group-hover:translate-x-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </Link>
+      </motion.div>
+    );
+  };
 
   return (
     <div className="min-h-screen text-gray-800 overflow-hidden">
@@ -244,224 +430,76 @@ export default function Home() {
       </AnimatePresence>
 
       {/* 소개 섹션 */}
-      <section className="py-32 bg-gradient-to-b from-blue-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-20">
-            <motion.h1 className="text-5xl md:text-7xl font-extrabold mb-8 gsap-fade-in bg-clip-text text-transparent tracking-tight leading-tight drop-shadow-md bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 sm:py-24 md:py-32 bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16 md:mb-24">
+            <div className="inline-block mb-3 px-4 sm:px-6 py-1.5 sm:py-2 bg-blue-600/10 rounded-full">
+              <span className="text-blue-700 font-semibold text-sm sm:text-base">
+                체리 동아리 소개
+              </span>
+            </div>
+            <motion.h1
+              className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 sm:mb-8 gsap-fade-in bg-clip-text text-transparent tracking-tight leading-tight drop-shadow-md bg-gradient-to-r from-blue-600 to-purple-600"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            >
               체리 동아리를 소개합니다
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-              className="text-xl md:text-2xl text-gray-800 mx-auto leading-relaxed font-medium whitespace-pre-line break-words hyphens-auto"
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
+              className="text-lg sm:text-xl md:text-2xl text-gray-800 mx-auto gsap-fade-in leading-relaxed font-medium whitespace-pre-line break-words hyphens-auto max-w-3xl px-2"
               style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
             >
-              체리 동아리는 '체인저 리더십(Changer Leadership) 동아리'의 준말로,
-              성경적 리더십 훈련을 통해 나를 변화시키고, 내가 속한 캠퍼스와
-              사회의 각 영역을 변화시키는 동아리입니다!
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-8"
-            >
-              <Link
-                href="/join"
-                className="inline-block bg-blue-600 text-white px-6 py-4 rounded-full text-base font-semibold hover:bg-blue-700 transition-all hover:scale-105 shadow-lg"
-              >
-                동아리 가입하기
-              </Link>
-            </motion.div>
+              체리 동아리는{" "}
+              <span className="text-blue-600 font-bold">
+                체인저 리더십(Changer Leadership) 동아리
+              </span>
+              의 준말로,{"\n"}
+              성경적 리더십 훈련을 통해 나를 변화시키고,{"\n"}
+              내가 속한 캠퍼스와 사회의 각 영역을 변화시키는 동아리입니다!
+            </motion.h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-xl gsap-scale border border-blue-100">
-              <div className="w-20 h-20 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full mb-8">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+          {isMobile ? (
+            <div className="relative">
+              <div className="overflow-hidden mx-auto">
+                <motion.div
+                  ref={sliderRef}
+                  animate={controls}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.1}
+                  onDragEnd={handleDragEnd}
+                  className="flex cursor-grab active:cursor-grabbing"
+                  style={{ touchAction: "pan-y" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                  />
-                </svg>
+                  {cards.map(renderCard)}
+                </motion.div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                리더십 개발
-              </h3>
-              <p
-                className="text-gray-600 text-lg"
-                style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-              >
-                체계적인 리더십 훈련 프로그램을 통해 미래 리더로서의 역량을
-                개발합니다.
-              </p>
-            </div>
 
-            <div className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-xl gsap-scale border border-green-100">
-              <div className="w-20 h-20 flex items-center justify-center bg-green-100 text-green-600 rounded-full mb-8">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              {/* 슬라이드 인디케이터 */}
+              <div className="flex justify-center mt-6 mb-6 space-x-2">
+                {cards.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      currentSlide === index ? "bg-blue-600 w-6" : "bg-blue-300"
+                    }`}
+                    aria-label={`슬라이드 ${index + 1}로 이동`}
                   />
-                </svg>
+                ))}
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                커뮤니티 형성
-              </h3>
-              <p
-                className="text-gray-600 text-lg"
-                style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-              >
-                같은 비전을 가진 대학생들과 함께 성장하는 커뮤니티를 구축합니다.
-              </p>
             </div>
-
-            <div className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-xl gsap-scale border border-purple-100">
-              <div className="w-20 h-20 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full mb-8">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                실제적인 경험
-              </h3>
-              <p
-                className="text-gray-600 text-lg"
-                style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-              >
-                다양한 활동과 프로젝트를 통해 실질적인 경험을 쌓을 수 있습니다.
-              </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-x-10 md:gap-y-16 mb-16 sm:mb-20">
+              {cards.map(renderCard)}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 활동 섹션 */}
-      <section className="py-32 bg-gradient-to-b from-white to-blue-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-24">
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 gsap-fade-in bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-              주요 활동
-            </h2>
-            <p
-              className="text-xl md:text-2xl text-gray-700 gsap-fade-in leading-relaxed"
-              style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-            >
-              NCMN 동아리는 다양한 활동을 통해 회원들의 성장을 지원합니다
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-            <div className="gsap-fade-in group">
-              <div className="relative h-96 rounded-3xl overflow-hidden mb-8 transform transition-transform duration-700 group-hover:scale-[1.02] shadow-xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1517048676732-d65bc937f952"
-                  alt="리더십 훈련"
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent opacity-70"></div>
-              </div>
-              <h3 className="text-3xl font-bold mb-4 text-gray-800">
-                리더십 훈련
-              </h3>
-              <p
-                className="text-gray-600 mb-6 text-xl"
-                style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-              >
-                체계적인 리더십 훈련 프로그램을 통해 개인의 잠재력을 발휘할 수
-                있도록 지원합니다.
-              </p>
-              <Link
-                href="/leadership"
-                className="inline-flex items-center text-blue-600 font-medium text-lg hover:text-blue-500 transition-colors"
-              >
-                자세히 알아보기
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 ml-2 transition-transform group-hover:translate-x-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Link>
-            </div>
-
-            <div className="gsap-fade-in group">
-              <div className="relative h-96 rounded-3xl overflow-hidden mb-8 transform transition-transform duration-700 group-hover:scale-[1.02] shadow-xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c"
-                  alt="캠퍼스 사역"
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent opacity-70"></div>
-              </div>
-              <h3 className="text-3xl font-bold mb-4 text-gray-800">
-                캠퍼스 사역
-              </h3>
-              <p
-                className="text-gray-600 mb-6 text-xl"
-                style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
-              >
-                각 대학 캠퍼스에서 다양한 활동을 통해 대학생활의 의미있는 경험을
-                제공합니다.
-              </p>
-              <Link
-                href="/campus"
-                className="inline-flex items-center text-blue-600 font-medium text-lg hover:text-blue-500 transition-colors"
-              >
-                자세히 알아보기
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 ml-2 transition-transform group-hover:translate-x-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -479,13 +517,32 @@ export default function Home() {
               지금 NCMN 동아리에 가입하고 리더십 여정을 시작하세요. 같은 비전을
               가진 동료들과 함께 성장할 수 있는 기회입니다.
             </p>
-            <div className="gsap-fade-in">
-              <Link
-                href="/join"
-                className="inline-block bg-blue-600 text-white px-14 py-7 rounded-full text-2xl font-semibold hover:bg-blue-700 transition-all hover:scale-105 shadow-xl"
+            <div className="text-center mt-6 sm:mt-10">
+              <motion.div
+                className="inline-block"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                동아리 가입하기
-              </Link>
+                <Link
+                  href="/join"
+                  className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-lg sm:text-xl hover:bg-blue-50 transition-colors shadow-lg inline-flex items-center touch-manipulation active:bg-blue-100"
+                >
+                  체리 동아리 신청하기
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         </div>
