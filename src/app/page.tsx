@@ -59,14 +59,12 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);
-  const controls = useAnimation();
   const statsRef = useRef(null);
   const isStatsInView = useInView(statsRef, {
     once: true,
     margin: "-100px 0px",
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSliding, setIsSliding] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -256,10 +254,8 @@ export default function Home() {
     arrows: false,
     autoplay: true,
     autoplaySpeed: 3000,
-    beforeChange: () => setIsSliding(true),
     afterChange: (current: number) => {
       setCurrentSlide(current);
-      setIsSliding(false);
     },
   };
 
