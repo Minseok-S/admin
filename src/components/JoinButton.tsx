@@ -29,16 +29,16 @@ const JoinButton = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3 }}
-          className="fixed bottom-6 right-6 z-50"
+          className="fixed bottom-6 right-6 z-50 hidden sm:block"
         >
           <Link
             href="/join"
-            className="flex items-center justify-center rounded-full bg-blue-600 text-white px-6 py-3 shadow-lg hover:bg-blue-700 transition-colors font-medium"
+            className="bg-white text-blue-600 border-2 border-blue-600 px-4 sm:px-8 py-2 sm:py-4 rounded-full font-semibold text-base sm:text-xl hover:bg-blue-50 transition-colors shadow-lg inline-flex items-center touch-manipulation active:bg-blue-100"
           >
-            <span>동아리 가입신청</span>
+            <span>체리 동아리 신청하기</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 ml-1"
+              className="h-4 w-4 sm:h-5 sm:w-5 ml-1"
               viewBox="0 0 20 20"
               fill="currentColor"
             >

@@ -7,13 +7,16 @@ import {
   useTransform,
   AnimatePresence,
   useAnimation,
-  useSpring,
   useInView,
 } from "framer-motion";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
+import Slider from "react-slick";
+import type { Settings } from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 // 카드 데이터 타입 정의
 interface CardData {
@@ -242,6 +245,24 @@ export default function Home() {
     },
   ];
 
+  // 슬라이더 설정
+  const sliderSettings: Settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    lazyLoad: "ondemand" as const,
+    arrows: false,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    beforeChange: () => setIsSliding(true),
+    afterChange: (current: number) => {
+      setCurrentSlide(current);
+      setIsSliding(false);
+    },
+  };
+
   useEffect(() => {
     // 3초 후 배경 어둡게
     const darkenTimer = setTimeout(() => {
@@ -322,70 +343,13 @@ export default function Home() {
     };
   }, []);
 
-  // 슬라이드 제어 함수
-  const handleDragEnd = (e: any, info: any) => {
-    if (!isMobile || isSliding) return; // 슬라이딩 중이면 추가 드래그 무시
-
-    // threshold와 velocity 값을 낮춰서 사용자 제스처에 더 민감하게 반응하도록 수정
-    const threshold = 20; // 50에서 20으로 낮춤
-    const velocity = 0.2; // 0.5에서 0.2로 낮춤
-
-    if (
-      (info.offset.x < -threshold || info.velocity.x < -velocity) &&
-      currentSlide < cards.length - 1
-    ) {
-      // OR 조건으로 변경하여 둘 중 하나만 충족해도 슬라이드가 넘어가도록 수정
-      changeSlide(currentSlide + 1); // 함수로 추출
-    } else if (
-      (info.offset.x > threshold || info.velocity.x > velocity) &&
-      currentSlide > 0
-    ) {
-      // OR 조건으로 변경
-      changeSlide(currentSlide - 1); // 함수로 추출
-    } else {
-      // 원래 위치로 복귀
-      animateToSlide(currentSlide);
-    }
-  };
-
-  // 슬라이드 변경을 처리하는 함수 추가
-  const changeSlide = (slideIndex: number) => {
-    if (isSliding) return; // 이미 슬라이딩 중이면 무시
-
-    setIsSliding(true);
-    setCurrentSlide(slideIndex);
-    animateToSlide(slideIndex);
-  };
-
-  // 슬라이드 애니메이션을 수행하는 함수 추가
-  const animateToSlide = (slideIndex: number) => {
-    if (isMobile) {
-      controls
-        .start({
-          x: -slideIndex * 100 + "%",
-          transition: { type: "spring", damping: 30, stiffness: 300 },
-        })
-        .then(() => {
-          setIsSliding(false); // 애니메이션 완료 후 상태 업데이트
-        });
-    }
-  };
-
-  // currentSlide가 변경될 때 슬라이드 애니메이션 실행
-  useEffect(() => {
-    // 슬라이드 상태가 변경될 때만 애니메이션 실행 (초기 마운트 시에는 실행하지 않음)
-    if (isMobile && currentSlide !== undefined) {
-      animateToSlide(currentSlide);
-    }
-  }, [currentSlide, isMobile]); // controls 의존성 제거
-
   // 카드 렌더링 함수
   const renderCard = (card: CardData, index: number) => {
     return (
       <motion.div
         key={card.id}
-        className={`gsap-fade-in group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden border border-gray-100 ${
-          isMobile ? "min-w-full" : ""
+        className={`gsap-fade-in group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden border border-gray-100 flex flex-col mx-2 ${
+          isMobile ? "min-w-full h-[500px]" : ""
         }`}
         whileHover={
           isMobile
@@ -400,11 +364,8 @@ export default function Home() {
         <div
           className={`absolute -right-20 -top-20 w-40 h-40 ${card.bgColor1} rounded-full opacity-30`}
         ></div>
-        <div
-          className={`absolute -left-10 -bottom-10 w-28 h-28 ${card.bgColor2} rounded-full opacity-30`}
-        ></div>
 
-        <div className="relative h-52 sm:h-64 md:h-72 rounded-xl sm:rounded-2xl overflow-hidden mb-5 sm:mb-8 transform transition-transform duration-700 group-hover:scale-[1.02] shadow-lg">
+        <div className="relative h-52 sm:h-64 md:h-60 rounded-xl sm:rounded-2xl overflow-hidden mb-5 sm:mb-6 transform transition-transform duration-700 group-hover:scale-[1.02] shadow-lg">
           <Image
             src={card.image}
             alt={card.title}
@@ -418,41 +379,44 @@ export default function Home() {
             </span>
           </div>
         </div>
-        <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-gray-800 flex items-center">
+        <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-gray-800 flex items-center">
           <span className="bg-blue-600 text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-sm mr-2 sm:mr-3">
             {String(index + 1).padStart(2, "0")}
           </span>
           {card.title}
         </h3>
-        {card.descriptions.map((desc: string, i: number) => (
-          <p
-            key={i}
-            className={`text-base sm:text-lg text-gray-600 ${
-              i === card.descriptions.length - 1 ? "mb-4 sm:mb-6" : ""
-            }`}
-            style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
+        <div className="overflow-hidden mb-4 h-[160px]">
+          {card.descriptions.map((desc: string, i: number) => (
+            <p
+              key={i}
+              className="text-sm sm:text-base text-gray-600 mb-2"
+              style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
+            >
+              {desc}
+            </p>
+          ))}
+        </div>
+
+        <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-4 sm:right-6">
+          <Link
+            href={card.link}
+            className="touch-manipulation inline-flex items-center text-blue-600 font-medium text-base hover:text-blue-500 transition-colors group-hover:underline active:text-blue-700"
           >
-            {desc}
-          </p>
-        ))}
-        <Link
-          href={card.link}
-          className="touch-manipulation inline-flex items-center text-blue-600 font-medium text-base sm:text-lg hover:text-blue-500 transition-colors group-hover:underline active:text-blue-700"
-        >
-          자세히 알아보기
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 sm:h-6 sm:w-6 ml-2 transition-transform group-hover:translate-x-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </Link>
+            자세히 알아보기
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 sm:h-6 sm:w-6 ml-2 transition-transform group-hover:translate-x-2"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        </div>
       </motion.div>
     );
   };
@@ -680,10 +644,41 @@ export default function Home() {
             </motion.h2>
           </div>
 
-          {/* 항상 그리드 레이아웃 사용 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-x-10 md:gap-y-16 mb-16 sm:mb-20">
-            {cards.map(renderCard)}
-          </div>
+          {/* 모바일에서는 슬라이더, 그 외에서는 그리드 레이아웃 사용 */}
+          {isMobile ? (
+            <div className="mb-16 sm:mb-20 px-2">
+              <Slider ref={sliderRef} {...sliderSettings}>
+                {cards.map(renderCard)}
+              </Slider>
+              {/* 캐러셀 인디케이터 */}
+              <div className="flex justify-center mt-6">
+                <div className="flex space-x-2">
+                  {cards.map((_, index) => (
+                    <motion.div
+                      key={index}
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        currentSlide === index
+                          ? "bg-blue-600 w-6"
+                          : "bg-blue-200"
+                      }`}
+                      animate={{
+                        width: currentSlide === index ? 24 : 10,
+                        backgroundColor:
+                          currentSlide === index
+                            ? "rgb(37, 99, 235)"
+                            : "rgb(219, 234, 254)",
+                      }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-x-6 md:gap-y-8 mb-16 sm:mb-20">
+              {cards.map(renderCard)}
+            </div>
+          )}
         </div>
       </section>
 
