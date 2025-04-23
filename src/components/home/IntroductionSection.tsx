@@ -165,7 +165,7 @@ export default function IntroductionSection() {
             </span>
           </div>
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 sm:mb-8 gsap-fade-in bg-clip-text text-transparent tracking-tight leading-tight drop-shadow-md bg-gradient-to-r from-blue-600 to-purple-600"
+            className="text-black text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 sm:mb-4 gsap-fade-in bg-clip-text  tracking-tight leading-tight "
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
@@ -176,16 +176,28 @@ export default function IntroductionSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-800 mx-auto gsap-fade-in leading-relaxed font-medium whitespace-pre-line break-words hyphens-auto max-w-3xl px-2"
+            className={`${
+              isMobile ? "text-base" : "text-lg sm:text-xl md:text-2xl"
+            } mx-auto gsap-fade-in leading-relaxed font-medium text-left whitespace-pre-line break-words hyphens-auto max-w-2xl px-2`}
             style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
           >
-            체리 동아리는{" "}
-            <span className="text-blue-600 font-bold">
-              체인저 리더십(Changer Leadership) 동아리
-            </span>
-            의 준말로,{"\n"}
-            성경적 리더십 훈련을 통해 나를 변화시키고,{"\n"}
-            내가 속한 캠퍼스와 사회의 각 영역을 변화시키는 동아리입니다!
+            {isMobile ? (
+              <>
+                체리는{" "}
+                <span className="text-blue-600 font-bold">체인저 리더십</span>의
+                줄임말입니다.{"\n"}
+                체리동아리는 성경적 리더십 훈련을 통해 나를 변화시키고, 내가
+                속한 캠퍼스와 사회의 각 영역을 변화시키는 동아리입니다!
+              </>
+            ) : (
+              <>
+                체리는{" "}
+                <span className="text-blue-600 font-bold">체인저 리더십</span>의
+                줄임말입니다.{"\n"}
+                체리동아리는 성경적 리더십 훈련을 통해 나를 변화시키고,{"\n"}
+                내가 속한 캠퍼스와 사회의 각 영역을 변화시키는 동아리입니다!
+              </>
+            )}
           </motion.h2>
         </div>
 
