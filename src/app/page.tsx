@@ -6,7 +6,6 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
-  useAnimation,
   useInView,
 } from "framer-motion";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
