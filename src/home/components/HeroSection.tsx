@@ -7,6 +7,7 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
+import { isMobileWeb } from "@toss/utils";
 
 export default function HeroSection() {
   const ref = useRef(null);
@@ -20,23 +21,24 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const scrollY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const Title_timer = 11000;
 
   useEffect(() => {
     // 배경 어둡게 처리 타이머
     const darkenTimer = setTimeout(() => {
       setVideoDarken(true);
-    }, 11000);
+    }, Title_timer);
 
     // 타이틀 표시 타이머
     const titleTimer = setTimeout(() => {
       setShowTitle(true);
-    }, 11000);
+    }, Title_timer);
 
     // 화면 크기 감지 함수
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (isMobileWeb()) {
         setVideoSrc("/videos/title_mobile.mp4");
       } else {
         setVideoSrc("/videos/title.mp4");
@@ -62,7 +64,7 @@ export default function HeroSection() {
       className="relative h-screen overflow-hidden flex items-center justify-center"
     >
       <motion.div
-        style={{ y, opacity }}
+        style={{ y: scrollY, opacity }}
         className="relative z-10 text-center px-4 max-w-4xl mx-auto"
       >
         <AnimatePresence>
