@@ -1,9 +1,9 @@
 "use client";
 
-import CTASection from "@/src/home/components/CTASection";
-import HeroSection from "@/src/home/components/HeroSection";
-import IntroductionSection from "@/src/home/components/IntroductionSection";
-import StatusSection from "@/src/home/components/StatusSection";
+import HeroSection from "@/src/home/components/Section/HeroSection";
+import IntroductionSection from "@/src/home/components/Section/IntroductionSection";
+import StatusSection from "@/src/home/components/Section/StatusSection";
+import CTASection from "@/src/home/components/Section/CTASection";
 
 export default function Home() {
   return (

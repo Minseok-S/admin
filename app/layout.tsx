@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
-import Header from "./components/Header";
-import JoinButton from "./components/JoinButton";
-import Footer from "./components/Footer";
+import Header from "../src/shared/components/Layouts/Header";
+import JoinButton from "../src/shared/components/JoinButton";
+import Footer from "../src/shared/components/Layouts/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

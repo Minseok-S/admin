@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
-import { regions, stats } from "../data/home";
-import { RegionData } from "../types/home";
-import StatCounter from "./StatCounter";
-import RegionPopup from "./RegionPopup";
+import { regions, stats } from "../../data/home";
+import { RegionData } from "../../types/home";
+import StatCounter from "../StatCounter";
+import RegionPopup from "../RegionPopup";
 
 export default function StatusSection() {
   const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);

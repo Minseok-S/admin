@@ -1,16 +1,14 @@
-import { CardData, RegionData, StatData } from "../types/home";
+import { InteractiveInfoCardData, RegionData, StatData } from "../types/home";
 
 // 카드 데이터
-export const cards: CardData[] = [
+export const cards: InteractiveInfoCardData[] = [
   {
     id: 1,
     title: "리더십 훈련",
     image: "/images/home/leadership-training.png",
     tag: "왕의 지도력 훈련",
     descriptions: [
-      "예수 그리스도의 리더십을 본받아, 나의 신분과 사명을 바로 알고,",
-      "사자의 리더십(사역)과 양의 리더십(관계)을 훈련합니다!",
-      "올바른 지도력을 발휘하는 성경적 방법인 셀프 리더십을 훈련합니다!",
+      "예수 그리스도의 리더십을 본받아, 나의 신분과 사명을 바로 알고, 사자의 리더십(사역)과 양의 리더십(관계)을 훈련합니다! 또한 올바른 지도력을 발휘하는 성경적 방법인 셀프 리더십을 훈련합니다.",
     ],
     link: "/leadership",
     bgColor1: "bg-blue-100",

@@ -21,8 +21,14 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  const scrollY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  /**
+   * 스크롤 위치에 따른 애니메이션 효과 변환 설정
+   * - scrollY: 스크롤 진행에 따라 0%에서 100%로 Y축 위치 변환 (패럴랙스 효과)
+   * - opacity: 스크롤이 50% 지점에 도달하면 완전히 투명해지는 페이드아웃 효과
+   */
+  const scrollY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
   const Title_timer = 11000;
 
   useEffect(() => {
@@ -78,7 +84,7 @@ export default function HeroSection() {
                   ease: [0.2, 0.65, 0.3, 1],
                   scale: { type: "spring", stiffness: 80 },
                 }}
-                className="text-5xl sm:text-6xl md:text-9xl font-extrabold text-white mb-8 tracking-tighter drop-shadow-[0_0_15px_rgba(0,0,255,0.8)] md:drop-shadow-[0_0_35px_rgba(0,0,255,0.8)] bg-clip-text"
+                className="text-5xl sm:text-6xl md:text-9xl font-extrabold text-white mb-16 tracking-tighter drop-shadow-[0_0_15px_rgba(0,0,255,0.8)] md:drop-shadow-[0_0_35px_rgba(0,0,255,0.8)] bg-clip-text"
               >
                 CHERRY CLUB
               </motion.h1>
@@ -90,7 +96,7 @@ export default function HeroSection() {
               >
                 <button
                   onClick={() => setVideoModal(true)}
-                  className="bg-white/20 backdrop-blur-sm text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-base sm:text-lg font-medium hover:bg-white/30 transition-all hover:scale-105 border border-white/30 mb-8 sm:mb-12"
+                  className="bg-white/20 backdrop-blur-sm text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-base sm:text-lg font-medium hover:bg-white/30 transition-all hover:scale-105 border border-white/30 mb-10 sm:mb-16"
                 >
                   전체 동영상 보기
                 </button>
@@ -100,9 +106,6 @@ export default function HeroSection() {
                 transition={{ repeat: Infinity, duration: 1.5 }}
                 className="flex flex-col items-center"
               >
-                <p className="text-white text-lg mb-2">
-                  스크롤을 내려 더 알아보기
-                </p>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-10 w-10 text-white"
