@@ -5,13 +5,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import Slider from "react-slick";
-import type { Settings } from "react-slick";
+import gsap from "gsap";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { cards } from "@/src/data/home";
-import { CardData } from "@/src/types/home";
-import gsap from "gsap";
+import type { Settings } from "react-slick";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cards } from "../data/home";
+import { CardData } from "../types/home";
 
 export default function IntroductionSection() {
   const sliderRef = useRef(null);

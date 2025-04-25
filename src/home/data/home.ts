@@ -1,4 +1,4 @@
-import { CardData, RegionData, StatData } from "@/src/types/home";
+import { CardData, RegionData, StatData } from "../types/home";
 
 // 카드 데이터
 export const cards: CardData[] = [
@@ -95,7 +95,7 @@ export const regions: RegionData[] = [
     y: 14,
     count: 45,
     universities: ["인하대학교", "경희대학교", "아주대학교"],
-    leader: "이주희",
+    leader: "OOO",
   },
   {
     id: 3,
@@ -104,7 +104,7 @@ export const regions: RegionData[] = [
     y: 16,
     count: 45,
     universities: ["인하대학교", "경희대학교", "아주대학교"],
-    leader: "이상준",
+    leader: "OOO",
   },
   {
     id: 4,
@@ -113,7 +113,7 @@ export const regions: RegionData[] = [
     y: 38,
     count: 36,
     universities: ["카이스트", "충남대학교", "한밭대학교"],
-    leader: "안결하",
+    leader: "OOO",
   },
   {
     id: 5,
@@ -122,7 +122,7 @@ export const regions: RegionData[] = [
     y: 60,
     count: 29,
     universities: ["전남대학교", "조선대학교", "전북대학교"],
-    leader: "이상준",
+    leader: "OOO",
   },
   {
     id: 6,
@@ -131,7 +131,7 @@ export const regions: RegionData[] = [
     y: 38,
     count: 52,
     universities: ["부산대학교", "경북대학교", "부경대학교"],
-    leader: "정다연",
+    leader: "OOO",
   },
   {
     id: 7,
@@ -140,7 +140,7 @@ export const regions: RegionData[] = [
     y: 57,
     count: 52,
     universities: ["부산대학교", "경북대학교", "부경대학교"],
-    leader: "강상아",
+    leader: "OOO",
   },
   {
     id: 8,
@@ -149,7 +149,7 @@ export const regions: RegionData[] = [
     y: 87,
     count: 12,
     universities: ["제주대학교"],
-    leader: "이상준",
+    leader: "OOO",
   },
 ];
 
